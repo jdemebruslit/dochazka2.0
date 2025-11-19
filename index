@@ -73,7 +73,7 @@
 
       <div class="row">
         <button class="btn-interval btn-large" onclick="zapsatInterval('Kropení')">Kropení</button>
-        <button class="btn-interval btn-large" onclick="zapsatInterval('Hrabani')">Hrabaní</button>
+        <button class="btn-interval btn-large" onclick="zapsatInterval('Hrabaní')">Hrabaní</button>
       </div>
     </div>
 
@@ -81,12 +81,12 @@
 </div>
 
 <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbwdiSsx2pm1UMAYOxzIN9IcnThimfwTl-6DF8zBP7RDV_m_WVyzd-APpDd1ZE0GNKSdUQ/exec";
+const scriptURL = "https://script.google.com/macros/s/AKfycbwdiSsx2pm1UMAYOxzIN9IcnThimfwTl-6DF8zBP7RDV_m_WVyzd-APpDd1ZE0GNKSdUQ/exec"; // sem vlož svůj Web App URL
 
-// Normalizace jména: odstranění diakritiky, malá písmena, bezpečné znaky
+// Normalizace jména
 function makeSafeName(raw){
   if(!raw) return "neznamy";
-  let s = raw.toString().normalize("NFD").replace(/[\u0300-\u036f]/g,""); // remove diacritics
+  let s = raw.toString().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
   s = s.toLowerCase().replace(/[^a-z0-9\s\-_]/g," ");
   s = s.replace(/\s+/g," ").trim();
   return s||"neznamy";
@@ -106,8 +106,6 @@ function prihlasit(){
   document.getElementById('login').style.display = "none";
   document.getElementById('panel').style.display = "block";
   document.getElementById('logoutBtn').style.display = "inline-block";
-
-  // Zobrazit normalizované jméno
   document.getElementById('uzivatel').innerText = `${jmenoNorm} — ${misto}`;
 }
 
@@ -128,17 +126,17 @@ function postToScript(payload){
   }).then(r=>r.text());
 }
 
-// Interval (Kropení/Hrabaní)
+// Interval
 function zapsatInterval(typ){
   const jmenoNorm = sessionStorage.getItem('jmenoNorm') || "neznamy";
   const misto = sessionStorage.getItem('misto') || "";
   const cas = new Date().toLocaleString('cs-CZ');
-  postToScript({jmeno:jmenoNorm,jmenoNorm,misto,typ,cas,action:'interval'})
+  postToScript({jmeno:jmenoNorm,misto,typ,cas,action:'interval'})
     .then(txt=>alert(txt))
     .catch(err=>alert("Chyba: "+err));
 }
 
-// Docházka (Příchod/Odchod) s kontrolou logiky
+// Docházka
 function zapsatDochazku(typ){
   const jmenoNorm = sessionStorage.getItem('jmenoNorm') || "neznamy";
   const misto = sessionStorage.getItem('misto') || "";
@@ -149,10 +147,9 @@ function zapsatDochazku(typ){
   if(typ === "Příchod" && stav === "prichod"){ alert("Příchod již zaznamenán."); return; }
   if(typ === "Odchod" && stav !== "prichod"){ alert("Nejdříve zaznamenej Příchod."); return; }
 
-  postToScript({jmeno:jmenoNorm,jmenoNorm,misto,typ,action:'dochazka'})
+  postToScript({jmeno:jmenoNorm,misto,typ,action:'dochazka'})
     .then(txt=>{
       alert(txt);
-      // aktualizace stavu
       if(typ==="Příchod"){ localStorage.setItem(stavKey,"prichod"); }
       if(typ==="Odchod"){ localStorage.setItem(stavKey,"odchod"); }
     })
